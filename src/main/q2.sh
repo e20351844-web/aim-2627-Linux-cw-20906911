@@ -6,27 +6,20 @@ input=${1:?需要输入目录}
 output=${2:?需要输出目录}
 
 # TODO：删除下方提示和 exit 77，再填写你的命令。
-cd $output
-mkdir sentry_ws
-cd sentry_ws
-mkdir scripts
-cd scripts
-touch hello.sh
-cat hello.sh > "#!/bin/bash"
-cat hello.sh > "echo 'Hello, AIM Linux!'"
-cd sentry_ws
-mkdir config
-cd config
-touch robot.conf
-cat robot.conf > robot=sentry
-cat robot.conf > mode=training
-cat robot.conf > log_level=INFO
-cd sentry_ws
-mkdir logs
-touch .keep
-cd sentry_ws
-mkdir tmp
-cd tmp
-touch scratch.txt
+ws="$output/sentry_ws"   #先将ouput输出目录与sentry_ws联系上绝对路径
+
+mkdir -p "$ws/scripts" "$ws/config" "$ws/logs" "$ws/tmp"   # -p 一次性建出4个子目录
+touch "$ws/logs/.keep" "$ws/tmp/scratch.txt"               # 创建空文件夹
+
+cat > "$ws/scripts/hello.sh" <<'EOF'   #意思是到下一行单独EOF之间输出的全都是hello.sh的内容
+#!/bin/bash
+echo "Hello, AIM Linux!"
+EOF
+
+cat > "$ws/config/robot.conf" <<'EOF'
+robot=sentry
+mode=training
+log_level=INFO
+EOF
 
 
