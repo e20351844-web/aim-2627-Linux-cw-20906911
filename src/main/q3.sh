@@ -14,8 +14,10 @@ cp "$input/draft.conf" "$ws/config/draft.conf"
 #因为直接写2，backup不存在，所以要先在ws后面创建一个
 mkdir -p "$ws/backup"
 cp "$ws/config/robot.conf" "$ws/backup/robot.conf"
+#因为是移动，所以应该有一个新的archive目录
+mkdir -p "$ws/archive"
 mv "$ws/config/draft.conf" "$ws/archive/draft.conf.old"
-rm "$ws/tmp"
+rm -rf "$ws/tmp"
 chmod 750 "$ws/scripts/hello.sh"
 chmod 640 "$ws/config/robot.conf"
 "$ws/scripts/hello.sh" > "$output/hello-output.txt"
