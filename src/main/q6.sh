@@ -6,5 +6,14 @@ input=${1:?需要输入目录}
 output=${2:?需要输出目录}
 
 # TODO：删除下方提示和 exit 77，再填写你的命令。
-printf '%s\n' 'Q6 尚未实现' >&2
-exit 77
+root="$output/sysroot"
+mkdir -p "$root/var/lib/dpkg"
+if [ ! -f "$root/var/lib/dpkg/status" ]; then
+    : > "$root/var/lib/dpkg/status"
+fi
+dpkg --root="$root" \
+     --force-not-root \
+     --log=/dev/null \
+     -i "$input/aim-sentry-tools.deb"
+"$root/usr/bin/aim-sentry-info" > "$output/tool-output.txt"
+exit 0
