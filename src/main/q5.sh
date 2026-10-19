@@ -6,5 +6,40 @@ input=${1:?需要输入目录}
 output=${2:?需要输出目录}
 
 # TODO：删除下方提示和 exit 77，再填写你的命令。
-printf '%s\n' 'Q5 尚未实现' >&2
-exit 77
+env_file="$input/launch.env"
+if [ -f "$env_file" ]; then
+    set -a
+    # shellcheck disable=SC1090
+    . "$env_file"
+    set +a
+fi
+
+LAUNCH_TOOL=${LAUNCH_TOOL:-}
+MODEL_PATH=${MODEL_PATH:-}
+CAMERA_PATH=${CAMERA_PATH:-}
+if "$LAUNCH_TOOL" --model "$MODEL_PATH" --camera "$CAMERA_PATH" \
+        > "$output/stdout.log" \
+        2> "$output/stderr.log"; then
+    rc=0
+else
+    rc=$?
+fi
+printf '%d\n' "$rc" > "$output/exit-code.txt"
+result=FAILED
+reason=NONE
+
+if [ "$rc" -eq 0 ]; then
+    result=SUCCESS
+    reason=NONE
+elif [ "$rc" -eq 10 ]; then
+    reason=MODEL_MISSING
+elif [ "$rc" -eq 20 ]; then
+    reason=CAMERA_DENIED
+fi
+
+{
+    printf 'RESULT=%s\n'    "$result"
+    printf 'exit_code=%d\n' "$rc"
+    printf 'reason=%s\n'    "$reason"
+} > "$output/report.txt"
+exit 0
