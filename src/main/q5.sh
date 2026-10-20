@@ -17,7 +17,7 @@ fi
 LAUNCH_TOOL=${LAUNCH_TOOL:-}
 MODEL_PATH=${MODEL_PATH:-}
 CAMERA_PATH=${CAMERA_PATH:-}
-if "$LAUNCH_TOOL" --model "$MODEL_PATH" --camera "$CAMERA_PATH" \
+if "$LAUNCH_TOOL" "$MODEL_PATH" "$CAMERA_PATH" \
         > "$output/stdout.log" \
         2> "$output/stderr.log"; then
     rc=0
@@ -38,7 +38,7 @@ elif [ "$rc" -eq 20 ]; then
 fi
 
 {
-    printf 'RESULT=%s\n'    "$result"
+    printf 'result=%s\n'    "$result"
     printf 'exit_code=%d\n' "$rc"
     printf 'reason=%s\n'    "$reason"
 } > "$output/report.txt"
