@@ -12,9 +12,9 @@ action=${3:-repair}
 STATUS_PATH='/status'
 EXPECT_BODY='SENTRYREADY'
 
-# HTTP 探测：单次 5 秒上限，最多重试 20 次（总计约 20 秒）
-HTTP_TIMEOUT=5
-HTTP_RETRIES=20
+# HTTP 探测：单次 2 秒上限，最多重试 10 次（总计约 20 秒）
+HTTP_TIMEOUT=2
+HTTP_RETRIES=10
 
 # 采集器日志里必须出现的两种标记
 MARK_START='START'
@@ -35,9 +35,23 @@ START_TOOL=${START_TOOL:-}
 
 # ==================== 工具函数 ====================
 
-# 等进程彻底消失；进程本就不存在时立即返回
+# 等进程退出。不能用 tail --pid：目标退出后若父进程没有 wait，
+# 它仍是僵尸，kill(pid, 0) 依然成功，tail 会一直等下去。
 wait_pid_gone() {
-    tail --pid="$1" -f /dev/null 2>/dev/null || true
+    pid=$1
+    count=0
+    while [ "$count" -lt 20 ]; do
+        state=$(ps -p "$pid" -o stat= 2>/dev/null | tr -d '[:space:]' || true)
+        if [ -z "$state" ]; then
+            return 0
+        fi
+        case "$state" in
+            Z*) return 0 ;;
+        esac
+        sleep 0.1
+        count=$((count + 1))
+    done
+    return 0
 }
 
 # 正常终止：先 TERM，再等它自己退出
@@ -115,10 +129,11 @@ do_repair() {
                      --retry "$HTTP_RETRIES" \
                      --retry-delay 1 \
                      --retry-connrefused \
+                     --retry-max-time 6 \
                      --max-time "$HTTP_TIMEOUT" \
                      -o "$output/http-body.txt" \
                      -w '%{http_code}' \
-                     "http://127.0.0.1:${TARGET_PORT}${STATUS_PATH}")
+                     "http://127.0.0.1:${TARGET_PORT}${STATUS_PATH}") || http_code=000
 
     printf '%s\n' "$http_code" > "$output/http-status.txt"
 
