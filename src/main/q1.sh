@@ -6,8 +6,8 @@ input=${1:?需要输入目录}
 output=${2:?需要输出目录}
 
 # TODO：删除下方提示和 exit 77，再填写你的命令。
-cd $input handover/
-pwd $output location.txt
+cd "$input/handover"
+pwd > "$output/location.txt"
 ls -a .robot-id
-cat ".robot-id" > "output/robot-id.txt"
-cat "notes/welcome.txt" > "output/welcome.txt"
+cat .robot-id > "$output/robot-id.txt"
+cat "$input/notes/welcome.txt" > "$output/welcome.txt"
