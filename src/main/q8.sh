@@ -70,7 +70,7 @@ do_repair() {
             read -r p_pid p_user p_stat p_args <<< "$snapshot"
 
             {
-                printf 'PID=%s\n'     "$p_pid"
+                printf 'pid=%s\n'     "$p_pid"
                 printf 'user=%s\n'    "$p_user"
                 printf 'state=%s\n'   "$p_stat"
                 printf 'command=%s\n' "$p_args"
